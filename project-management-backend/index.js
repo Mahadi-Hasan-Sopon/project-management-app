@@ -41,6 +41,52 @@ async function run() {
     // collections
     const projectCollection = database.collection("projects");
 
+    //  Routes
+
+    // get all projects
+    app.get("/projects", async (req, res) => {
+      const cursor = projectCollection.find({});
+      const projects = await cursor.toArray();
+      res.send(projects);
+    });
+
+    // get project by id
+    app.get("/projects/:id", async (req, res) => {
+      const id = req.params.id;
+      const project = await projectCollection.findOne({ _id: ObjectId(id) });
+      res.send(project);
+    });
+
+    // update a project
+    app.put("/projects", async (req, res) => {
+      const projectDetails = req.body;
+      const result = await projectCollection.updateOne(
+        { _id: ObjectId(projectDetails._id) },
+        {
+          $set: {
+            ...projectDetails,
+          },
+        }
+      );
+      res.json(result);
+    });
+
+    // insert a new project
+    app.post("/projects", async (req, res) => {
+      const project = req.body;
+      const result = await projectCollection.insertOne(project);
+      res.send(result);
+    });
+
+    // delete a project
+    app.delete("/projects/:id", async (req, res) => {
+      const projectId = req.params.id;
+      const result = await projectCollection.deleteOne({
+        _id: ObjectId(projectId),
+      });
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("You have successfully connected to MongoDB!");
